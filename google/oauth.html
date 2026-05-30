@@ -403,14 +403,14 @@
   <div class="step" id="p1s2">
     <div class="step-head">
       <div class="num">二</div>
-      <h3>啟用 Drive、Gmail、Sheets 三個 API</h3>
+      <h3>啟用 Google Drive API（以 Drive 為例）</h3>
       <span class="scope-tag gcp">GCP</span>
     </div>
 
     <div class="why-box">
       <span class="eyebrow">為什麼要做這件事</span>
-      <p>Google Cloud 預設什麼 API 都沒開。Drive API、Gmail API、Sheets API 是<b>三個獨立的功能開關</b>，要逐一找到並打開。</p>
-      <p>三個一次啟用完最省事，未來 n8n 隨時想用哪個都行，<b>不用再回來 Google Cloud 開東西</b>。</p>
+      <p>Google Cloud 預設什麼 API 都沒開。要用哪個 Google 服務，就要先去找到那個 API 的開關，按啟用。</p>
+      <p>這裡<b>用 Drive 當示範</b>。Gmail、Sheets、Calendar、YouTube 等其他 Google 服務都是同一個套路，只是換個關鍵字搜尋而已。</p>
     </div>
 
     <div class="howto-box">
@@ -421,7 +421,6 @@
         <li>搜尋結果第一筆是 <b>Google Drive API</b>（旁邊寫 Marketplace），點它。</li>
         <li>進到「產品詳細資料」頁，看到 Google Drive API 介紹，按下面的 <b>啟用</b> 按鈕。</li>
         <li>等幾秒，看到「<b>已啟用 API</b>」或進入 API 管理頁面，就代表 Drive API 啟用完成。</li>
-        <li>重複上面五步，分別搜尋 <code>gmail</code> 啟用 <b>Gmail API</b>，搜尋 <code>sheets</code> 啟用 <b>Google Sheets API</b>。</li>
       </ol>
     </div>
 
@@ -454,7 +453,12 @@
 
     <div class="note ok">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-      <span>啟用是一次性動作。同一個專案下，<b>一個 API 啟用過就永遠是開的</b>，不用每次都重啟用。</span>
+      <span>啟用是一次性動作，同一個專案下，<b>一個 API 啟用過就永遠是開的</b>。</span>
+    </div>
+
+    <div class="note bridge">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span><b>Gmail、Sheets、其他 Google 服務如法炮製：</b>同樣按搜尋圖示，分別搜 <code>gmail</code>、<code>sheets</code>、<code>calendar</code>、<code>youtube</code> 等，找到對應 API 按啟用即可，流程一模一樣。</span>
     </div>
   </div>
 
@@ -538,10 +542,6 @@
       <figcaption>目標對象選「外部」，個人用必選這個</figcaption>
     </figure>
 
-    <div class="note ok">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-      <span>新版這套流程把舊版的「填基本資料 + 加 Scopes」拆開了。<b>Scopes（權限範圍）不在這裡設定</b>，未來在 n8n 端授權時，Google 會根據 n8n 程式碼自動帶出要授權的範圍清單，你按同意即可。</span>
-    </div>
   </div>
 
   <div class="step" id="p2s3">
@@ -561,11 +561,29 @@
       <span class="eyebrow">操作步驟</span>
       <ol>
         <li>在 Google Auth Platform 左側選單，<b>點「目標對象」</b>。</li>
-        <li>頁面捲到下面找「<b>測試使用者</b>」區，按 <b>+ 新增使用者</b>。</li>
-        <li>輸入你自己的 Gmail（就是你要被 n8n 代理存取的那個帳號），按 <b>儲存</b>。</li>
-        <li>看到那個 Gmail 出現在測試使用者清單就完成了。</li>
+        <li>頁面捲到下面找「<b>測試使用者</b>」區，按 <b>+ Add users</b>（新增使用者）。</li>
+        <li>跳出視窗，在輸入框填入你自己的 Gmail（就是你要被 n8n 代理存取的那個帳號）。</li>
+        <li>按 <b>儲存</b>。看到那個 Gmail 出現在測試使用者清單就完成了。</li>
       </ol>
     </div>
+
+    <figure>
+      <img class="shot" src="images/step-add-test-users.png" alt="Google Auth Platform 目標對象頁面，下方測試使用者區的新增使用者按鈕" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-add-test-users.png</div>
+      </div>
+      <figcaption>左側選單點「目標對象」，下面找測試使用者區，按新增</figcaption>
+    </figure>
+
+    <figure>
+      <img class="shot" src="images/step-add-user-input.png" alt="新增使用者跳出框，輸入 Gmail" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-add-user-input.png</div>
+      </div>
+      <figcaption>輸入你自己的 Gmail，按儲存</figcaption>
+    </figure>
 
     <div class="note">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
@@ -651,6 +669,15 @@
       </div>
       <figcaption>應用程式類型選網頁應用程式，名稱填 n8n</figcaption>
     </figure>
+
+    <figure>
+      <img class="shot" src="images/step-client-created.png" alt="OAuth 用戶端已建立彈窗，顯示用戶端 ID 跟用戶端密鑰" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-client-created.png</div>
+      </div>
+      <figcaption>跳出「OAuth 用戶端已建立」視窗，下一段要回頭複製這裡的用戶端 ID 跟密鑰</figcaption>
+    </figure>
   </div>
 
   <!-- ============ PART 4 ============ -->
@@ -683,25 +710,44 @@
       <span class="eyebrow">操作步驟</span>
       <ol>
         <li>打開 n8n（<a href="http://localhost:5678" target="_blank" style="color:var(--n8n);font-weight:500;">http://localhost:5678</a>）。</li>
-        <li>左側選單點 <b>Credentials</b>，再按 <b>+ Add Credential</b>。</li>
-        <li>搜尋 <b>Google Drive OAuth2 API</b>，點進去。</li>
-        <li>會看到一個欄位叫 <b>OAuth Redirect URL</b>，那是 n8n 自動產生的，<b>長得像</b> <code>http://localhost:5678/rest/oauth2-credential/callback</code>。</li>
+        <li>左側選單點 <b>Credentials</b>（憑證），頁面右上角按紅色的 <b>Create credential</b>（建立憑證）按鈕。</li>
+        <li>跳出 <b>Add new credential</b>（新增憑證）視窗，搜尋列輸入 <code>drive</code>，<b>點 Google Drive OAuth2 API</b>。</li>
+        <li>進入憑證設定頁面，最上面可以幫憑證命名（例如 <code>XXX 的 Google drive</code>，方便之後辨認）。</li>
+        <li>看到欄位 <b>OAuth Redirect URL</b>，那是 n8n 自動產生的，<b>長得像</b> <code>http://localhost:5678/rest/oauth2-credential/callback</code>。</li>
         <li><b>點右邊的複製按鈕</b>，把這個 URL 複製起來。</li>
       </ol>
     </div>
 
     <div class="note bridge">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      <span><b>n8n 視窗先別關。</b>等一下還要回來貼 Client ID 跟 Secret。直接開新分頁去 GCP 補資料就好。</span>
+      <span><b>n8n 視窗先別關。</b>等一下還要回來貼用戶端 ID 跟密鑰。直接開新分頁去 GCP 補資料就好。</span>
     </div>
 
     <figure>
-      <img class="shot" src="images/step-n8n-redirect-url.png" alt="n8n 的 Google Drive OAuth2 憑證頁面，顯示 OAuth Redirect URL" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img class="shot" src="images/step-n8n-credentials.png" alt="n8n Credentials 頁面，右上紅色 Create credential 按鈕" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="ph" style="display:none">
         <div class="ph-t">截圖位置</div>
-        <div class="ph-s">把「n8n 顯示 Redirect URL」截圖存成<br><code>google/images/step-n8n-redirect-url.png</code></div>
+        <div class="ph-s">step-n8n-credentials.png</div>
       </div>
-      <figcaption>n8n 自動產生的 OAuth Redirect URL，複製它</figcaption>
+      <figcaption>n8n 左側選單點 Credentials，右上按 Create credential</figcaption>
+    </figure>
+
+    <figure>
+      <img class="shot" src="images/step-n8n-search-drive.png" alt="n8n Add new credential 視窗搜尋 drive，選 Google Drive OAuth2 API" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-n8n-search-drive.png</div>
+      </div>
+      <figcaption>搜尋 drive，點 Google Drive OAuth2 API</figcaption>
+    </figure>
+
+    <figure>
+      <img class="shot" src="images/step-n8n-redirect-url.png" alt="n8n 的 Google Drive OAuth2 憑證頁面，標出名稱欄位、OAuth Redirect URL、Client ID、Client Secret 位置" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-n8n-redirect-url.png</div>
+      </div>
+      <figcaption>圖中三處標號：1 名稱、2 OAuth Redirect URL 要複製、3 Client ID 跟 Secret 等下從 GCP 拿回來貼</figcaption>
     </figure>
   </div>
 
@@ -723,11 +769,20 @@
         <li>切回 Google Cloud Console 的 Google Auth Platform 頁面，左側點 <b>用戶端</b>。</li>
         <li>找到剛建的 <b>n8n</b> 用戶端，<b>點名稱進去編輯</b>。</li>
         <li>找到 <b>已授權的重新導向 URI</b> 區塊，按 <b>+ 新增 URI</b>。</li>
-        <li>把剛從 n8n 複製的網址貼上去（<code>http://localhost:5678/rest/oauth2-credential/callback</code>）。</li>
-        <li>按 <b>儲存</b>。</li>
+        <li>會跳出 URI 1 輸入欄，把剛從 n8n 複製的網址<b>貼到那個欄位</b>（取代預設的 https://www.example.com）。</li>
+        <li>按 <b>儲存</b>。設定可能需要幾分鐘才生效。</li>
         <li>回用戶端清單，<b>再點 n8n 進去</b>，右上角會看到 <b>用戶端 ID</b> 跟 <b>用戶端密鑰</b>，準備複製這兩串。</li>
       </ol>
     </div>
+
+    <figure>
+      <img class="shot" src="images/step-gcp-redirect.png" alt="GCP 編輯網頁應用程式用戶端 ID，貼上重新導向 URI" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">step-gcp-redirect.png</div>
+      </div>
+      <figcaption>左側選單點「用戶端」進去，把 n8n 給的網址貼到「已授權的重新導向 URI」</figcaption>
+    </figure>
   </div>
 
   <div class="step n8n-step" id="p4s3">
@@ -775,26 +830,27 @@
       <ol>
         <li>在 n8n 憑證頁面，按 <b>Sign in with Google</b>（用 Google 帳戶登入）按鈕。</li>
         <li>會跳出新視窗讓你選 Google 帳號，<b>選你剛在「測試使用者」加的那個帳號</b>。</li>
-        <li>會看到一個警告「Google 尚未驗證這個應用程式」，按 <b>進階</b> → <b>前往 n8n（不安全）</b>。這正常，因為這是你自己的 App，不會通過 Google 正式審查。</li>
-        <li>看到授權清單（要存取你的 Drive、Gmail、Sheets），按 <b>繼續</b> 或 <b>允許</b>。</li>
+        <li>會看到一個警告「Google 尚未驗證這個應用程式」，按 <b>進階</b>，再按 <b>前往 n8n（不安全）</b>。這正常，因為這是你自己的 App，不會通過 Google 正式審查。</li>
+        <li>看到「<b>選取要讓 [App名] 存取的範圍</b>」清單，<b>勾「全選」</b>把所有權限都勾起來，按 <b>繼續</b>。</li>
         <li>視窗會自動關閉，回到 n8n。憑證頁面標題出現綠色 <b>Connected</b>（已連線）字樣，就成功了。</li>
         <li>按 <b>Save</b>（儲存）把這個憑證存下來，給未來的 workflow 用。</li>
       </ol>
     </div>
 
     <figure>
-      <img class="shot" src="images/step-n8n-connected.png" alt="n8n 顯示 Connected 成功狀態" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <img class="shot" src="images/step-n8n-authorize.png" alt="n8n 按 Sign in with Google 後跳出 Google 授權視窗，要勾全選確認存取範圍" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
       <div class="ph" style="display:none">
         <div class="ph-t">截圖位置</div>
-        <div class="ph-s">把「n8n Connected 成功」截圖存成<br><code>google/images/step-n8n-connected.png</code></div>
+        <div class="ph-s">step-n8n-authorize.png</div>
       </div>
-      <figcaption>看到 Connected 綠字代表 OAuth 串接成功</figcaption>
+      <figcaption>左邊按 Sign in with Google，跳出右邊授權視窗，勾「全選」按繼續</figcaption>
     </figure>
   </div>
 
   <div class="done-card">
     <h3>Drive 憑證搞定了</h3>
-    <p>Gmail 跟 Sheets 也要用？回 n8n Credentials 重複 PART 4 第一步，分別建 <b>Gmail OAuth2 API</b> 跟 <b>Google Sheets OAuth2 API</b> 憑證，<b>同樣用剛剛 GCP 那組 Client ID + Secret</b>。Redirect URL 都一樣，不用再回 GCP 改。</p>
+    <p>想加 Gmail、Sheets、Calendar 等其他 Google 服務？只要做兩件事：</p>
+    <p style="margin-top:10px;">第一，回 <a href="#p1s2" style="color:var(--accent-warm);font-weight:500;">PART 1 第二步</a>，照同樣方法去 GCP 啟用對應的 API（搜 gmail / sheets / calendar 等）。第二，回 n8n Credentials 重複 PART 4 第一步，分別建 <b>Gmail OAuth2 API</b>、<b>Google Sheets OAuth2 API</b> 等憑證，<b>用同一組 GCP 用戶端 ID 跟密鑰</b>。Redirect URL 都一樣，不用再回 GCP 改。</p>
   </div>
 
 </section>
