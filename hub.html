@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>煎餃實驗室 ｜ 地端部署 × n8n × 自動化系列教學</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-paper:#f9f9f7;
+    --bg-paper-warm:#f4f1ec;
+    --ink:#2c2c2c;
+    --ink-soft:#6b7280;
+    --ink-faint:#9ca3af;
+    --accent:#8c7b75;
+    --accent-warm:#a0674b;
+    --accent-light:#b8a89e;
+    --accent-mist:#e0dcd8;
+    --card:#ffffff;
+    --green:#5a7a5a;
+    --red-soft:#c0392b;
+    --font-serif:"Noto Serif TC",serif;
+    --font-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    --font-num:"DM Serif Display","Noto Serif TC",serif;
+    --radius:12px;
+    --shadow:0 1px 3px rgba(44,44,44,.04), 0 4px 16px rgba(44,44,44,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font-sans);color:var(--ink);background:var(--bg-paper);
+    line-height:1.85;font-weight:300;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+  h1,h2,h3,h4{font-family:var(--font-serif);font-weight:600}
+
+  /* Hero */
+  .hero{
+    background:var(--bg-paper-warm);color:var(--ink);padding:96px 0 96px;text-align:center;
+    border-bottom:1px solid var(--accent-mist);position:relative;
+  }
+  .hero::after{content:"";display:block;width:60px;height:2px;background:var(--accent-light);margin:42px auto 0}
+  .hero .brand-mark{
+    width:84px;height:84px;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);border-radius:14px;
+  }
+  .hero .eyebrow{
+    display:block;font-size:13px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent-warm);font-weight:500;margin-bottom:20px;font-family:var(--font-sans);
+  }
+  .hero h1{font-size:clamp(34px,6vw,52px);font-weight:700;letter-spacing:-.015em;line-height:1.3;font-family:var(--font-serif)}
+  .hero .lead{
+    margin-top:24px;font-size:18px;color:var(--ink-soft);max-width:640px;margin-left:auto;margin-right:auto;
+    line-height:1.85;font-weight:300;
+  }
+  .hero .meta{margin-top:32px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .pill{
+    font-size:12.5px;padding:5px 14px;border-radius:6px;
+    background:rgba(160,103,75,.10);border:1px solid var(--accent-light);
+    color:var(--accent-warm);font-weight:500;letter-spacing:.05em;
+  }
+
+  /* Intro board */
+  .intro-board{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 32px;margin-top:-46px;position:relative;z-index:2;
+  }
+  .intro-board h2{font-size:18px;margin-bottom:10px;font-family:var(--font-serif);font-weight:600;color:var(--ink)}
+  .intro-board p{color:var(--ink-soft);font-size:16px;line-height:1.85;font-weight:300}
+  .intro-board p + p{margin-top:10px}
+  .intro-board b{color:var(--ink);font-weight:500}
+
+  /* Section header */
+  .section-head{
+    margin:64px 0 24px;text-align:center;
+  }
+  .section-head .eyebrow{
+    display:block;font-size:12px;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent-warm);font-weight:600;margin-bottom:8px;
+  }
+  .section-head h2{
+    font-size:28px;font-weight:600;font-family:var(--font-serif);color:var(--ink);letter-spacing:-.01em;
+  }
+  .section-head::after{
+    content:"";display:block;width:60px;height:2px;background:var(--accent-light);
+    margin:18px auto 0;
+  }
+
+  /* Course cards grid */
+  .courses{display:grid;grid-template-columns:1fr;gap:20px;margin-top:32px}
+  @media (min-width:680px){.courses{grid-template-columns:repeat(2,1fr)}}
+
+  .course-card{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 28px 24px;
+    display:flex;flex-direction:column;text-decoration:none;color:inherit;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .course-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 2px 6px rgba(44,44,44,.06), 0 12px 32px rgba(44,44,44,.08);
+  }
+  .course-card.upcoming{
+    border-left-color:var(--accent-light);background:var(--bg-paper-warm);
+    cursor:default;opacity:.85;
+  }
+  .course-card.upcoming:hover{transform:none;box-shadow:var(--shadow)}
+
+  .course-card .top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:14px}
+  .course-card .chapter-num{
+    font-family:var(--font-num);font-size:36px;line-height:1;color:var(--accent-light);
+  }
+  .course-card .tag{
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;
+    padding:4px 10px;border-radius:4px;font-family:var(--font-sans);
+    background:rgba(160,103,75,.10);color:var(--accent-warm);border:1px solid var(--accent-light);
+    white-space:nowrap;
+  }
+  .course-card .tag.coming{background:transparent;color:var(--ink-faint);border-color:var(--accent-mist)}
+  .course-card .tag.done{background:#f3f4ee;color:var(--green);border-color:#cdd1c0}
+
+  .course-card h3{
+    font-size:22px;font-weight:600;font-family:var(--font-serif);color:var(--ink);
+    line-height:1.4;margin-bottom:10px;letter-spacing:-.005em;
+  }
+  .course-card .desc{
+    font-size:15px;color:var(--ink-soft);line-height:1.8;font-weight:300;
+    margin-bottom:18px;flex-grow:1;
+  }
+  .course-card .meta-row{
+    display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-faint);
+    padding-top:14px;border-top:1px dashed var(--accent-mist);
+    letter-spacing:.05em;
+  }
+  .course-card .meta-row span{display:inline-flex;align-items:center;gap:6px}
+  .course-card .meta-row svg{stroke:var(--accent-light)}
+  .course-card .cta-arrow{
+    margin-top:14px;color:var(--accent-warm);font-size:14px;font-weight:500;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .course-card.upcoming .cta-arrow{color:var(--ink-faint)}
+
+  /* Concept block */
+  .concept{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);padding:30px 32px;margin:24px 0;box-shadow:var(--shadow);
+  }
+  .concept h3{
+    font-size:18px;margin-bottom:14px;font-family:var(--font-serif);font-weight:600;color:var(--ink);
+  }
+  .concept p{color:var(--ink-soft);font-size:15.5px;line-height:1.85;font-weight:300}
+  .concept p + p{margin-top:10px}
+  .concept b{color:var(--ink);font-weight:500}
+
+  /* About card */
+  .about-card{
+    background:var(--bg-paper-warm);border:1px solid var(--accent-mist);
+    border-radius:var(--radius);padding:30px 32px;margin-top:48px;text-align:center;
+  }
+  .about-card h3{font-size:18px;margin-bottom:10px;color:var(--ink)}
+  .about-card p{color:var(--ink-soft);font-size:15px;line-height:1.85;font-weight:300;max-width:560px;margin:0 auto}
+
+  /* Footer */
+  footer{
+    text-align:center;padding:48px 0 56px;color:var(--ink-faint);font-size:13px;
+    background:var(--bg-paper-warm);border-top:1px solid var(--accent-mist);margin-top:64px;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand-mark" aria-hidden="true">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#a0674b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+      </svg>
+    </div>
+    <span class="eyebrow">煎餃實驗室 ※ 地端部署系列</span>
+    <h1>不上雲、不付月費的<br>自動化工具養成計畫</h1>
+    <p class="lead">把自動化工具養在自己的電腦裡。一步一步來，從裝 Docker 到接 Google 服務，全程圖解、國中生友善、不講術語、不收費。</p>
+    <div class="meta">
+      <span class="pill">Windows 10 / 11</span>
+      <span class="pill">小白友善</span>
+      <span class="pill">免費</span>
+      <span class="pill">持續更新</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="intro-board">
+    <h2>這個系列要解決什麼？</h2>
+    <p>市面上自動化工具大多走「<b>雲端服務 + 月費</b>」路線：Zapier、Make、IFTTT 都是。但雲端版有三個痛點：<b>每月要錢、資料在別人手上、跑不快</b>。</p>
+    <p>這個系列教你把所有自動化工具<b>蓋在自己電腦裡</b>（地端部署），一次設好、永久免費、資料自己留。從最基礎的 Docker 安裝開始，一步一步擴充到接 Google、Notion、LINE 等服務。</p>
+  </div>
+
+  <div class="section-head">
+    <span class="eyebrow">教學列表</span>
+    <h2>從這裡開始</h2>
+  </div>
+
+  <div class="courses">
+
+    <a class="course-card" href="./">
+      <div class="top-row">
+        <span class="chapter-num">01</span>
+        <span class="tag done">第一步</span>
+      </div>
+      <h3>地端部署 n8n</h3>
+      <p class="desc">把 n8n 蓋在自己電腦裡。從下載 Docker、處理 WSL 更新，到用 Docker 跑起 n8n。十二步走完，自家機器裡長出一座自動化工坊。</p>
+      <div class="meta-row">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          約 30 分鐘
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          12 個步驟
+        </span>
+      </div>
+      <span class="cta-arrow">開始 →</span>
+    </a>
+
+    <a class="course-card" href="google/oauth.html">
+      <div class="top-row">
+        <span class="chapter-num">02</span>
+        <span class="tag done">延伸</span>
+      </div>
+      <h3>n8n 接 Google 服務</h3>
+      <p class="desc">n8n 跑起來之後，下一步是讓它能動你的 Google 資料（Drive / Gmail / Sheets）。流程是設一把 OAuth 鑰匙給 n8n 用，要在 GCP 跟 n8n 之間來回接線兩次。</p>
+      <div class="meta-row">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          約 25 分鐘
+        </span>
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          4 段 11 步
+        </span>
+      </div>
+      <span class="cta-arrow">開始 →</span>
+    </a>
+
+    <div class="course-card upcoming">
+      <div class="top-row">
+        <span class="chapter-num">03</span>
+        <span class="tag coming">籌備中</span>
+      </div>
+      <h3>n8n 接 Gemini AI</h3>
+      <p class="desc">在 n8n 裡呼叫 Google Gemini AI 做摘要、翻譯、分類。從 GCP 拿 Gemini API Key 開始，接到 n8n 的 AI 節點。</p>
+      <div class="meta-row">
+        <span>預計近期推出</span>
+      </div>
+      <span class="cta-arrow">敬請期待</span>
+    </div>
+
+    <div class="course-card upcoming">
+      <div class="top-row">
+        <span class="chapter-num">04</span>
+        <span class="tag coming">籌備中</span>
+      </div>
+      <h3>n8n 接 LINE 機器人</h3>
+      <p class="desc">把 LINE Bot 接到 n8n。收訊息、自動回覆、發推播。讓 LINE 變成你個人自動化助理的前台介面。</p>
+      <div class="meta-row">
+        <span>預計近期推出</span>
+      </div>
+      <span class="cta-arrow">敬請期待</span>
+    </div>
+
+  </div>
+
+  <div class="section-head">
+    <span class="eyebrow">給誰看</span>
+    <h2>這個系列適合你嗎？</h2>
+  </div>
+
+  <div class="concept">
+    <h3>適合這幾種人</h3>
+    <p>第一種，<b>想做自動化但不想付月費</b>的人。你發現 Zapier 一個月幾百塊很痛，想找免費替代方案。n8n 自架版本，只要你電腦開著就免費跑到死。</p>
+    <p>第二種，<b>資料隱私敏感</b>的人。你的工作流程涉及客戶名單、敏感對話、私人筆記，不想交給雲端服務商存。地端部署，資料只在你硬碟上。</p>
+    <p>第三種，<b>想學技術但被術語勸退過</b>的人。我們用便當盒、廚房、房子當比喻，所有 UI 按鈕都用中文，每個步驟都先講「為什麼要做這件事」再講「怎麼做」。</p>
+  </div>
+
+  <div class="concept">
+    <h3>不適合這幾種人</h3>
+    <p>第一，<b>需要團隊協作的中大型團隊</b>。地端部署是個人或小團隊方案，多人協作建議直接用 n8n Cloud 或 self-host 在公司伺服器。</p>
+    <p>第二，<b>不想動手摸技術</b>的人。雖然我們把流程拆得很細，但仍然要打開 Docker、命令提示字元、GCP Console。如果這些字眼讓你頭痛，建議從 Zapier 或 Make 起步。</p>
+  </div>
+
+  <div class="about-card">
+    <h3>關於這個系列</h3>
+    <p>這個系列由 <b>閃電煎餃</b>整理，原型來自實體課程教學筆記。教材<b>持續更新</b>，新教學會優先補在這個頁面。歡迎分享、討論、回報問題。</p>
+    <p style="margin-top:14px;">
+      <a href="https://gyozalab.com/" target="_blank" rel="noopener" style="color:var(--accent-warm);text-decoration:none;font-weight:500;border-bottom:1px dashed var(--accent-light);padding-bottom:2px;">gyozalab.com</a>
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+      <a href="https://github.com/gyozalab/docker-n8n-guide" target="_blank" rel="noopener" style="color:var(--accent-warm);text-decoration:none;font-weight:500;border-bottom:1px dashed var(--accent-light);padding-bottom:2px;">GitHub Repo</a>
+    </p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div style="font-size:12px;color:var(--accent);margin-bottom:18px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;">煎餃實驗室 ※ 地端部署系列</div>
+    <div style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:8px;background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);box-shadow:var(--shadow);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a0674b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+      </svg>
+      <span style="color:var(--ink);font-weight:600;font-size:14px;font-family:var(--font-serif);">閃電煎餃</span>
+      <span style="color:var(--ink-faint);font-size:13px;">出品</span>
+      <span style="color:var(--accent-light);">·</span>
+      <a href="https://gyozalab.com/" target="_blank" rel="noopener"
+         style="color:var(--accent-warm);text-decoration:none;font-size:13px;font-weight:500;">
+        gyozalab.com
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
