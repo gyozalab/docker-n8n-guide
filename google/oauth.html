@@ -397,7 +397,7 @@
 
     <div class="note">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
-      <span>第一次用 Google Cloud 會要你綁信用卡。Drive、Gmail、Sheets 這三個 API 完全免費，個人用根本不會扣錢，放心綁。</span>
+      <span>第一次用 Google Cloud 會要你綁信用卡。Drive、Gmail、Sheets 這三個 API 在免費額度內<b>通常不會產生費用</b>，但建議：(1) 用<b>個人 Gmail</b> 而不是學校或公司帳號（後者常被組織政策擋）；(2) 進 GCP 左側選單「<b>帳單</b> → <b>預算與快訊</b>」設一個每月 NT$0 的預算警示，<b>一花到錢就會立刻寄信通知你</b>。</span>
     </div>
   </div>
 
@@ -832,10 +832,15 @@
         <li>在 n8n 憑證頁面，按 <b>Sign in with Google</b>（用 Google 帳戶登入）按鈕。</li>
         <li>會跳出新視窗讓你選 Google 帳號，<b>選你剛在「測試使用者」加的那個帳號</b>。</li>
         <li>會看到一個警告「Google 尚未驗證這個應用程式」，按 <b>進階</b>，再按 <b>前往 n8n（不安全）</b>。這正常，因為這是你自己的 App，不會通過 Google 正式審查。</li>
-        <li>看到「<b>選取要讓 [App名] 存取的範圍</b>」清單，<b>勾「全選」</b>把所有權限都勾起來，按 <b>繼續</b>。</li>
+        <li>看到「<b>選取要讓 [App名] 存取的範圍</b>」清單。<b>測試階段先勾「全選」</b>讓憑證一次過（n8n Drive 節點可能用到 read/write/metadata 三類權限，逐項勾很容易漏）。按 <b>繼續</b>。</li>
         <li>視窗會自動關閉，回到 n8n。憑證頁面標題出現綠色 <b>Connected</b>（已連線）字樣，就成功了。</li>
         <li>按 <b>Save</b>（儲存）把這個憑證存下來，給未來的 workflow 用。</li>
       </ol>
+    </div>
+
+    <div class="note ok">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <span><b>真接通驗收（30 秒）：</b>別只看到 Connected 就跑掉，OAuth 握手成功不等於 API 真能調資料。馬上做一次小測試：<b>新建一個 workflow，拖一個 Google Drive 節點，Credential 欄選你剛建的這個憑證，Operation 選 Search、Resource 選 File/Folder，按 Execute step</b>。看到下面回傳你 Drive 裡的檔案列表，才算真接通。如果報 <code>insufficient permission</code>，回 PART 4 Step 4 重做授權，記得勾全選。</span>
     </div>
 
     <figure>
@@ -846,6 +851,11 @@
       </div>
       <figcaption>左邊按 Sign in with Google，跳出右邊授權視窗，勾「全選」按繼續</figcaption>
     </figure>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span><b>之後上線給別人用怎麼辦？</b>個人自己練習用「全選」最方便。但這個憑證如果未來要上線給多人用、或這支 workflow 只會用到 Gmail 讀信功能，<b>回頭只保留實際用到的權限</b>就好（最小權限原則）。詳細怎麼收緊範圍見 <a href="#security" style="color:var(--accent-warm);font-weight:500;">頁尾安全守則</a>。</span>
+    </div>
   </div>
 
   <div class="done-card">

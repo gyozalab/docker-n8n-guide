@@ -493,6 +493,11 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
       </a>
     </div>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span><b>用公司電腦的人先停一下。</b>安裝過程會跳 UAC 視窗要管理員密碼，公司電腦多半沒給你。<b>先問 IT 三件事</b>：(1) 能不能裝 Docker Desktop？(2) 能不能開 WSL 或 Hyper-V？(3) 公司 Proxy 會不會擋 Docker Hub？問清楚再下載。下面除錯區「<a href="#trouble" style="color:var(--accent-warm);font-weight:500;">用公司電腦特別會卡的事</a>」有完整說明。</span>
+    </div>
   </div>
 
   <!-- STEP 2 -->
@@ -859,6 +864,11 @@
       <figcaption>填好三項後，按右下角的 Run</figcaption>
     </figure>
 
+    <div class="note" style="background:#fcf0ee;border-color:#e8c2bc;color:var(--red-soft);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span><b>填 Host path 之前，先在檔案總管手動建一個 <code style="background:#fff;color:var(--ink);padding:1px 6px;border-radius:4px;border:1px solid var(--accent-mist)">C:\n8n</code> 資料夾。</b>而且<b>不要</b>放這些位置：桌面、Downloads、OneDrive / Google Drive / iCloud 同步資料夾、任何含中文字的路徑。<b>OneDrive 會把 n8n 資料庫一起同步造成檔案鎖死</b>、中文路徑偶發解析失敗、Downloads 被防毒掃影響速度。<b>直接放 C 槽根目錄</b> <code style="background:#fff;color:var(--ink);padding:1px 6px;border-radius:4px;border:1px solid var(--accent-mist)">C:\n8n</code> 最穩。</span>
+    </div>
+
     <div class="note">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
       <span><b>Volumes 在做什麼？</b>它把你電腦上的 <code>C:\n8n</code> 資料夾「連通」到 n8n 容器內部那個叫 <code>/home/node/.n8n</code> 的資料夾。這樣 n8n 寫的資料其實是寫到你電腦的硬碟上，<b>就算容器被砍掉，資料還在</b>。</span>
@@ -897,6 +907,11 @@
         <code>Editor is now accessible via:
 <span class="prompt">http://localhost:5678</span></code>
       </div>
+    </div>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span><code>http://localhost:5678</code> 是什麼？<b>不是一個網站，是「你自己這台電腦裡」的 n8n 入口</b>。只有你的瀏覽器打得開，別人連不到。詳細解釋見下面除錯區「<a href="#trouble" style="color:var(--accent-warm);font-weight:500;">localhost:5678 在講什麼</a>」。</span>
     </div>
 
     <figure>
@@ -1075,7 +1090,11 @@
       <div class="pill-yn yes">只有一個，繼續第 3 步</div>
     </div>
     <div class="fix" style="margin-top:12px;padding:12px 14px;background:var(--bg-paper-warm);border-left:3px solid var(--accent-warm);border-radius:4px;font-size:14.5px;color:var(--ink);line-height:1.8;">
-      <b style="color:var(--accent-warm)">怎麼判斷哪個要刪？</b>看建立時間，留比較新的那個。或兩個都刪掉，從 Images 重新 Run 一次。
+      <b style="color:var(--accent-warm)">先 Stop，不要直接 Delete</b>：把滑鼠移到那行，先按方塊狀的 <b>Stop</b> 鈕讓它停下來，<b>不要按垃圾桶</b>。
+      <br><br>
+      <b style="color:var(--accent-warm)">確認 Volume 指向哪</b>：點容器名字進去，找 <b>Inspect</b> 分頁，看 <b>Mounts → Source</b> 是不是指到 <code style="background:var(--card);padding:1px 6px;border-radius:4px;border:1px solid var(--accent-mist)">C:\n8n</code>。兩個都確認過再決定哪個留。
+      <br><br>
+      <b style="color:var(--accent-warm)">真要刪：拒勾「Delete Volumes」</b>：按垃圾桶後跳出視窗會問「也要刪除 Volume 嗎」，<b>一定選否</b>。否則你的 n8n 帳號跟所有 workflow 會全部消失。
     </div>
   </div>
 
@@ -1200,7 +1219,7 @@
 
   <details>
     <summary>Host path 為什麼用 C:\n8n？我可以改別的資料夾嗎？</summary>
-    <p>可以。這只是「你電腦上拿來存 n8n 資料的資料夾」，放哪都行，只要寫成 Docker 看得懂的路徑（例如 <code>D:\我的資料\n8n</code>）。但 Container path（<code>/home/node/.n8n</code>）<b>不能改</b>，那是 n8n 程式內部固定要寫資料的位置。</p>
+    <p>可以。這只是「你電腦上拿來存 n8n 資料的資料夾」，只要寫成 Docker 看得懂的路徑（例如 <code>D:\n8n</code>）就行。<b>但不要放桌面、Downloads、OneDrive / Google Drive / iCloud 同步資料夾、或含中文字的路徑</b>（範例：<code>D:\我的資料\n8n</code> 不行，<code>D:\n8n</code> 才安全）。Container path（<code>/home/node/.n8n</code>）<b>不能改</b>，那是 n8n 程式內部固定要寫資料的位置。</p>
   </details>
 
   <details>
