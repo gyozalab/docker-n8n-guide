@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>n8n 接 Google Drive / Gmail / Sheets 教學 ｜ OAuth 用戶端設定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Noto+Serif+TC:wght@500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-paper:#f9f9f7;
+    --bg-paper-warm:#f4f1ec;
+    --ink:#2c2c2c;
+    --ink-soft:#6b7280;
+    --ink-faint:#9ca3af;
+    --accent:#8c7b75;
+    --accent-warm:#a0674b;
+    --accent-light:#b8a89e;
+    --accent-mist:#e0dcd8;
+    --card:#ffffff;
+    --term-bg:#2c2624;
+    --warn-bg:#faf5ec;
+    --warn-line:#d9c9a8;
+    --warn-ink:#7a5a2e;
+    --green:#5a7a5a;
+    --red-soft:#c0392b;
+    --n8n:#ea4b71;
+    --font-serif:"Noto Serif TC",serif;
+    --font-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    --font-num:"DM Serif Display","Noto Serif TC",serif;
+    --radius:12px;
+    --shadow:0 1px 3px rgba(44,44,44,.04), 0 4px 16px rgba(44,44,44,.05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  .step{scroll-margin-top:20px}
+  body{
+    font-family:var(--font-sans);color:var(--ink);background:var(--bg-paper);
+    line-height:1.85;font-weight:300;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:840px;margin:0 auto;padding:0 20px}
+  h1,h2,h3,h4{font-family:var(--font-serif);font-weight:600}
+
+  /* Hero */
+  .hero{
+    background:var(--bg-paper-warm);color:var(--ink);padding:78px 0 78px;text-align:center;
+    border-bottom:1px solid var(--accent-mist);position:relative;
+  }
+  .hero::after{content:"";display:block;width:60px;height:2px;background:var(--accent-light);margin:38px auto 0}
+  .hero .icon{
+    width:78px;height:78px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);border-radius:14px;
+  }
+  .hero .eyebrow{
+    display:block;font-size:13px;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--accent-warm);font-weight:500;margin-bottom:18px;font-family:var(--font-sans);
+  }
+  .hero h1{font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-.01em;line-height:1.35}
+  .hero p{margin-top:18px;font-size:17px;color:var(--ink-soft);max-width:620px;margin-left:auto;margin-right:auto;line-height:1.85;font-weight:300}
+  .hero .meta{margin-top:26px;display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .pill{
+    font-size:12.5px;padding:5px 14px;border-radius:6px;
+    background:rgba(160,103,75,.10);border:1px solid var(--accent-light);
+    color:var(--accent-warm);font-weight:500;letter-spacing:.05em;
+  }
+
+  /* Cards */
+  .board{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px;margin-top:-44px;position:relative;z-index:2;
+  }
+  .board h2{font-size:17px;margin-bottom:8px;font-family:var(--font-serif);font-weight:600;color:var(--ink)}
+  .board p{color:var(--ink-soft);font-size:15.5px;line-height:1.85}
+
+  /* concept diagram (三方關係圖) */
+  .concept-diagram{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 28px;margin-top:18px;
+  }
+  .concept-diagram h2{font-size:17px;margin-bottom:18px;font-family:var(--font-serif);font-weight:600;color:var(--ink)}
+  .triangle{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:24px 0 18px;
+  }
+  @media (max-width:580px){.triangle{grid-template-columns:1fr}}
+  .actor{
+    background:var(--bg-paper-warm);border:1px solid var(--accent-mist);border-radius:10px;
+    padding:18px 16px;text-align:center;
+  }
+  .actor .role{
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);
+    font-weight:600;margin-bottom:8px;
+  }
+  .actor .name{font-size:18px;font-weight:600;font-family:var(--font-serif);color:var(--ink);margin-bottom:6px}
+  .actor .desc{font-size:13.5px;color:var(--ink-soft);line-height:1.7}
+  .concept-diagram .summary{font-size:15px;color:var(--ink-soft);line-height:1.85;font-weight:300;margin-top:14px;padding-top:14px;border-top:1px dashed var(--accent-mist)}
+  .concept-diagram .summary b{color:var(--ink);font-weight:500}
+
+  /* TOC */
+  .toc{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 28px;margin-top:18px;
+  }
+  .toc h3{font-size:13px;font-weight:600;letter-spacing:.25em;text-transform:uppercase;color:var(--accent-warm);margin-bottom:18px;font-family:var(--font-sans)}
+  .toc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  @media (max-width:780px){.toc-grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:460px){.toc-grid{grid-template-columns:1fr}}
+  .toc-col h4{
+    font-size:12px;color:var(--accent);letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--accent-mist);font-family:var(--font-sans);
+  }
+  .toc-col ol{list-style:none;padding:0;margin:0}
+  .toc-col li{margin-bottom:6px}
+  .toc-col a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink-soft);font-size:14px;padding:6px 8px;border-radius:6px;transition:all .15s}
+  .toc-col a:hover{background:var(--bg-paper-warm);color:var(--accent-warm)}
+  .toc-col a .tn{
+    flex:0 0 auto;width:24px;height:24px;border-radius:6px;background:var(--bg-paper-warm);color:var(--ink);
+    border:1px solid var(--accent-mist);font-family:var(--font-serif);
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;
+  }
+  .toc-col a:hover .tn{background:var(--accent-warm);color:#fff;border-color:var(--accent-warm)}
+
+  /* Steps */
+  section.steps{padding:56px 0 24px}
+  .step{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 30px 32px;margin-bottom:28px;
+  }
+  .step.n8n-step{border-left-color:var(--n8n)}
+  .step.n8n-step .num{color:var(--n8n);border-color:#f0b4c2}
+  .step-head{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+  .num{
+    flex:0 0 auto;width:42px;height:42px;border-radius:10px;
+    background:var(--bg-paper-warm);color:var(--accent-warm);font-weight:700;font-size:20px;
+    border:1px solid var(--accent-light);font-family:var(--font-serif);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step h3{font-size:21px;font-weight:600;color:var(--ink);letter-spacing:-.005em}
+  .scope-tag{
+    display:inline-block;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;
+    padding:3px 10px;border-radius:4px;margin-left:auto;font-family:var(--font-sans);
+  }
+  .scope-tag.gcp{background:rgba(160,103,75,.12);color:var(--accent-warm)}
+  .scope-tag.n8n{background:rgba(234,75,113,.12);color:var(--n8n)}
+
+  /* why/howto */
+  .why-box{
+    background:var(--bg-paper-warm);border:1px solid var(--accent-mist);
+    border-radius:10px;padding:18px 20px;margin-top:14px;
+  }
+  .why-box .eyebrow{
+    display:inline-block;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent-warm);font-weight:600;margin-bottom:8px;font-family:var(--font-sans);
+  }
+  .why-box p{color:var(--ink);font-size:15.5px;line-height:1.85;font-weight:300}
+  .why-box p + p{margin-top:8px}
+  .why-box.bridge{background:#f8efe9;border-color:#e6c8b6}
+  .why-box.bridge .eyebrow{color:var(--accent-warm)}
+
+  .howto-box{margin-top:18px;padding-top:18px;border-top:1px dashed var(--accent-mist)}
+  .howto-box .eyebrow{
+    display:inline-block;font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin-bottom:10px;font-family:var(--font-sans);
+  }
+  .howto-box ol{padding-left:22px;color:var(--ink-soft);font-size:16px;line-height:1.85}
+  .howto-box ol li{margin-bottom:6px}
+  .howto-box ol li b{color:var(--ink)}
+  .howto-box ul{padding-left:22px;color:var(--ink-soft);font-size:15.5px;line-height:1.85}
+  .howto-box ul li{margin-bottom:6px}
+
+  /* part divider */
+  .part-div{display:flex;align-items:center;gap:16px;margin:48px 0 28px}
+  .part-div .line{flex:1;height:1px;background:var(--accent-mist)}
+  .part-div .tag{
+    background:transparent;border:1px solid var(--accent-warm);color:var(--accent-warm);
+    font-weight:600;font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    padding:8px 18px;border-radius:6px;font-family:var(--font-sans);
+  }
+  .part-div .tag.n8n{border-color:var(--n8n);color:var(--n8n)}
+  .part-div .tag.bridge{border-color:var(--accent);color:var(--accent);background:var(--bg-paper-warm)}
+  .part-title{font-size:26px;font-weight:600;text-align:center;margin-bottom:8px;color:var(--ink)}
+  .part-sub{text-align:center;color:var(--ink-soft);font-size:15.5px;margin-bottom:28px;max-width:600px;margin-left:auto;margin-right:auto;line-height:1.85;font-weight:300}
+
+  /* note */
+  .note{
+    margin-top:16px;background:var(--warn-bg);border:1px solid var(--warn-line);
+    border-radius:10px;padding:14px 18px;color:var(--warn-ink);font-size:15px;
+    display:flex;gap:12px;align-items:flex-start;line-height:1.75;
+  }
+  .note svg{flex:0 0 auto;margin-top:3px;stroke:var(--warn-ink)}
+  .note.ok{background:#f3f4ee;border-color:#cdd1c0;color:var(--green)}
+  .note.ok svg{stroke:var(--green)}
+  .note.danger{background:#fcf0ee;border-color:#e8c2bc;color:var(--red-soft)}
+  .note.danger svg{stroke:var(--red-soft)}
+  .note.bridge{background:#f8efe9;border-color:#e6c8b6;color:var(--accent-warm)}
+  .note.bridge svg{stroke:var(--accent-warm)}
+
+  /* link button */
+  a.linkbtn{
+    display:inline-flex;align-items:center;gap:8px;margin-top:14px;
+    background:var(--accent-warm);color:#fff;text-decoration:none;font-weight:500;letter-spacing:.02em;
+    padding:11px 22px;border-radius:8px;font-size:15px;transition:background .2s;
+  }
+  a.linkbtn:hover{background:#8a5640}
+  a.linkbtn.n8n{background:var(--n8n)}
+  a.linkbtn.n8n:hover{background:#d13d61}
+
+  /* screenshot */
+  figure{margin-top:20px}
+  .shot{width:100%;border-radius:10px;border:1px solid var(--accent-mist);display:block;background:var(--card)}
+  .ph{
+    width:100%;min-height:150px;border:1.5px dashed var(--accent-light);border-radius:10px;
+    background:var(--bg-paper-warm);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--ink-faint);gap:6px;text-align:center;padding:24px;
+  }
+  .ph .ph-t{font-weight:600;color:var(--accent);font-size:14px;letter-spacing:.1em}
+  .ph .ph-s{font-size:13px;line-height:1.7}
+  figcaption{margin-top:10px;font-size:13px;color:var(--ink-faint);text-align:center;font-style:italic}
+
+  code{background:var(--bg-paper-warm);padding:1px 6px;border-radius:4px;border:1px solid var(--accent-mist);font-family:"SFMono-Regular",Consolas,monospace;font-size:14px;word-break:break-all}
+
+  /* done card */
+  .done-card{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);
+    color:var(--ink);border-radius:var(--radius);
+    padding:32px 28px;text-align:center;box-shadow:var(--shadow);margin:24px 0 12px;
+  }
+  .done-card h3{font-size:22px;font-weight:600;font-family:var(--font-serif);color:var(--accent-warm)}
+  .done-card p{margin-top:10px;color:var(--ink-soft);font-size:15.5px;line-height:1.8}
+
+  /* security card */
+  .sec-card{
+    background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--red-soft);
+    border-radius:var(--radius);padding:28px 30px;margin:36px 0 24px;box-shadow:var(--shadow);
+  }
+  .sec-card h3{font-size:20px;font-weight:600;margin-bottom:14px;color:var(--red-soft);font-family:var(--font-serif)}
+  .sec-card ul{padding-left:22px;color:var(--ink);font-size:15.5px;line-height:1.85;font-weight:300}
+  .sec-card ul li{margin-bottom:8px}
+  .sec-card ul li b{font-weight:600;color:var(--ink)}
+
+  /* footer */
+  footer{
+    text-align:center;padding:48px 0 56px;color:var(--ink-faint);font-size:13px;
+    background:var(--bg-paper-warm);border-top:1px solid var(--accent-mist);margin-top:48px;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="icon" aria-hidden="true">
+      <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#a0674b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <span class="eyebrow">煎餃 ※ 地端部署系列 ※ 02</span>
+    <h1>n8n 接 Google 服務</h1>
+    <p>Drive、Gmail、Google Sheets 都要過這關。流程是設一把 OAuth 鑰匙給 n8n 用，<b>不是 API Key 那種一串字</b>，而是要在 GCP 跟 n8n 之間來回接線兩次。</p>
+    <div class="meta">
+      <span class="pill">Drive</span>
+      <span class="pill">Gmail</span>
+      <span class="pill">Sheets</span>
+      <span class="pill">OAuth 2.0 用戶端</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="board">
+    <h2>等一下，為什麼這次不是 API Key？</h2>
+    <p>因為你要 n8n 去動<b>「你的」</b> Drive、Gmail、Sheets 資料。Google 不能光憑一串密碼就把你的東西交給 n8n，它要你<b>「親自授權」</b>給 n8n。授權這件事走的是另一套機制，叫做 <b>OAuth 2.0</b>。</p>
+    <p style="margin-top:10px;">差別像這樣：API Key 像是「房子的鑰匙」（給誰就能進去）；OAuth 像是「飯店的房卡」（要本人去櫃台辦理、授權給特定人、可以隨時撤銷）。Drive 跟 Gmail 這種會碰到你個人資料的，Google 強制要走 OAuth。</p>
+  </div>
+
+  <div class="concept-diagram">
+    <h2>三方關係：你、n8n、Google</h2>
+    <div class="triangle">
+      <div class="actor">
+        <div class="role">你</div>
+        <div class="name">資料主人</div>
+        <div class="desc">Gmail / Drive / Sheets 都是你的東西，你說了算</div>
+      </div>
+      <div class="actor">
+        <div class="role">仲介</div>
+        <div class="name">n8n</div>
+        <div class="desc">想代表你去存取你的 Google 資料做自動化</div>
+      </div>
+      <div class="actor">
+        <div class="role">資料保管者</div>
+        <div class="name">Google</div>
+        <div class="desc">手上有你的資料，但只認你授權給誰</div>
+      </div>
+    </div>
+    <p class="summary">所以我們要做的事就是：<b>到 Google 那邊登記一個叫 n8n 的「應用程式」</b>（PART 1-3 在 GCP 做），<b>然後在 n8n 那邊用這個身份去敲 Google 的門</b>（PART 4 在 n8n 做）。中間 Google 會跳出視窗問你「你真的要授權 n8n 嗎？」按同意之後，n8n 才能用。</p>
+  </div>
+
+  <nav class="toc">
+    <h3>目錄</h3>
+    <div class="toc-grid">
+      <div class="toc-col">
+        <h4>PART 1 ※ 啟用 API</h4>
+        <ol>
+          <li><a href="#p1s1"><span class="tn">一</span>登入 + 建 Project</a></li>
+          <li><a href="#p1s2"><span class="tn">二</span>啟用三個 API</a></li>
+        </ol>
+      </div>
+      <div class="toc-col">
+        <h4>PART 2 ※ 設同意畫面</h4>
+        <ol>
+          <li><a href="#p2s1"><span class="tn">一</span>選 User Type</a></li>
+          <li><a href="#p2s2"><span class="tn">二</span>填基本資料 + Scopes</a></li>
+          <li><a href="#p2s3"><span class="tn">三</span>加 Test Users</a></li>
+        </ol>
+      </div>
+      <div class="toc-col">
+        <h4>PART 3 ※ 建用戶端</h4>
+        <ol>
+          <li><a href="#p3s1"><span class="tn">一</span>進 Credentials</a></li>
+          <li><a href="#p3s2"><span class="tn">二</span>建 OAuth 用戶端</a></li>
+          <li><a href="#p3s3"><span class="tn">三</span>選網頁應用程式</a></li>
+        </ol>
+      </div>
+      <div class="toc-col">
+        <h4>PART 4 ※ 接線 n8n</h4>
+        <ol>
+          <li><a href="#p4s1"><span class="tn">一</span>去 n8n 拿 URL</a></li>
+          <li><a href="#p4s2"><span class="tn">二</span>回 GCP 貼 URL</a></li>
+          <li><a href="#p4s3"><span class="tn">三</span>回 n8n 貼 ID Secret</a></li>
+          <li><a href="#p4s4"><span class="tn">四</span>授權登入</a></li>
+        </ol>
+      </div>
+    </div>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px dashed var(--accent-mist);display:flex;flex-wrap:wrap;gap:8px;">
+      <a href="#security" style="text-decoration:none;background:transparent;color:var(--red-soft);font-size:13px;padding:8px 16px;border-radius:6px;border:1px solid var(--red-soft);font-weight:500;letter-spacing:.05em;">※ 安全守則</a>
+      <a href="../" style="text-decoration:none;background:var(--bg-paper-warm);color:var(--accent-warm);font-size:13px;padding:8px 16px;border-radius:6px;border:1px solid var(--accent-light);font-weight:500;letter-spacing:.05em;">◁ 回 n8n 主教學</a>
+    </div>
+  </nav>
+</div>
+
+<section class="steps wrap">
+
+  <!-- ============ PART 1 ============ -->
+  <div class="part-div">
+    <span class="line"></span><span class="tag">PART 1</span><span class="line"></span>
+  </div>
+  <div class="part-title">在 GCP 啟用 Drive / Gmail / Sheets 三個 API</div>
+  <div class="part-sub">先讓 Google 知道你打算用這幾個服務。不啟用，後面就算授權也沒用。</div>
+
+  <div class="step" id="p1s1">
+    <div class="step-head">
+      <div class="num">一</div>
+      <h3>登入 GCP Console，建一個叫 n8n 的 Project</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>GCP（Google Cloud Platform）用 <b>Project（專案）</b> 來分裝你的東西。一個 Project 像一個資料夾，裡面放著你啟用的 API、建立的用戶端、產生的金鑰。</p>
+      <p>我們建一個專門給 n8n 用的 Project，未來所有 n8n 相關的 Google 設定都集中在這裡，乾淨好管。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>去 <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:var(--accent-warm);font-weight:500;">console.cloud.google.com</a>，用你常用的 Google 帳號登入。</li>
+        <li>第一次登入的話：選國家 <b>Taiwan</b>、勾同意條款、按 <b>Agree and Continue</b>。</li>
+        <li>登入後，點 Console 頂端中央的 <b>Project 下拉選單</b>（顯示 Select a project 或預設專案名）。</li>
+        <li>跳出視窗右上角點 <b>NEW PROJECT</b>。</li>
+        <li>Project name 填 <code>n8n</code>，按 <b>CREATE</b>，等 5-10 秒。</li>
+        <li>建好後，回頂端下拉選單，<b>切換到剛建好的 n8n Project</b>。確認頂端顯示 n8n 才能繼續。</li>
+      </ol>
+      <a class="linkbtn" href="https://console.cloud.google.com/" target="_blank" rel="noopener">
+        前往 Google Cloud Console
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>
+      </a>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-create-project.png" alt="GCP 建立新 Project，命名為 n8n" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「建立 Project」截圖存成<br><code>google/images/step-create-project.png</code></div>
+      </div>
+      <figcaption>建一個 Project 叫 n8n</figcaption>
+    </figure>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span>第一次用 GCP 會要你綁信用卡。Google Drive / Gmail / Sheets 這幾個 API 完全免費，個人用根本不會扣錢，放心綁。</span>
+    </div>
+  </div>
+
+  <div class="step" id="p1s2">
+    <div class="step-head">
+      <div class="num">二</div>
+      <h3>啟用 Drive、Gmail、Sheets 三個 API</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>GCP 預設什麼都沒開。Drive API、Gmail API、Sheets API 是<b>三個獨立的功能開關</b>，要逐一打開。</p>
+      <p>三個一次啟用完最省事，未來 n8n 隨時想用哪個都行，<b>不用再回來 GCP 開東西</b>。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>在 Console 頂端的<b>搜尋列</b>，輸入 <code>Google Drive API</code>。</li>
+        <li>點搜尋結果裡的 <b>Google Drive API</b>（有 Google 圖示那個）。</li>
+        <li>進到 API 介紹頁，按藍色的 <b>ENABLE</b> 按鈕，等幾秒看到啟用完成。</li>
+        <li>重複上面三步，分別啟用 <b>Gmail API</b> 跟 <b>Google Sheets API</b>。</li>
+      </ol>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-enable-apis.png" alt="GCP 啟用三個 API 範例" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「啟用 API」截圖存成<br><code>google/images/step-enable-apis.png</code></div>
+      </div>
+      <figcaption>逐個啟用 Drive API / Gmail API / Sheets API</figcaption>
+    </figure>
+
+    <div class="note ok">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <span>啟用是一次性動作。同一個 Project 下，<b>一個 API 啟用過就永遠是開的</b>，不用每次都重啟用。</span>
+    </div>
+  </div>
+
+  <!-- ============ PART 2 ============ -->
+  <div class="part-div">
+    <span class="line"></span><span class="tag">PART 2</span><span class="line"></span>
+  </div>
+  <div class="part-title">設定 OAuth 同意畫面</div>
+  <div class="part-sub">這是 Google 強制的：要建 OAuth 用戶端之前，先告訴 Google 你的 App 是誰、要做什麼、誰能用。不先設這個，第三段建用戶端的按鈕會是灰的，按不下去。</div>
+
+  <div class="step" id="p2s1">
+    <div class="step-head">
+      <div class="num">一</div>
+      <h3>進 OAuth 同意畫面，選 User Type 為 External</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>OAuth 授權時 Google 會跳出一個視窗給使用者看，寫著「某某 App 要存取你的 Gmail，你同意嗎？」這個視窗的內容就是<b>同意畫面（Consent Screen）</b>，要先設好它，才能建用戶端。</p>
+      <p>User Type 兩個選擇：Internal 只給同公司 Workspace 帳號用（要 Google Workspace 才能選），個人用戶都選 <b>External</b>。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>Console 左上角點選單（三條橫線），找 <b>APIs &amp; Services</b>，子選單點 <b>OAuth consent screen</b>。</li>
+        <li>看到 User Type 選擇：<b>External</b>（個人用戶必選這個）。</li>
+        <li>按 <b>CREATE</b>。</li>
+      </ol>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-consent-type.png" alt="選擇 OAuth User Type 為 External" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「選 User Type」截圖存成<br><code>google/images/step-consent-type.png</code></div>
+      </div>
+      <figcaption>選 External，按 CREATE</figcaption>
+    </figure>
+  </div>
+
+  <div class="step" id="p2s2">
+    <div class="step-head">
+      <div class="num">二</div>
+      <h3>填基本資料 + 加 Scopes（要授權哪些 API）</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>同意畫面上要顯示「這個 App 叫什麼名字、出問題找誰、要存取你哪些東西」。所以要填 App 名稱、聯絡 email、還有 <b>scopes</b>。</p>
+      <p>Scopes 就是<b>權限範圍</b>。你可以選「只讀 Drive」「能寫 Gmail」「能改 Sheets」之類。授權時 Google 會把這些列出來給使用者看：「你要授權 n8n 做以下幾件事」。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟（App information）</span>
+      <ol>
+        <li><b>App name</b> 填 <code>n8n</code>。</li>
+        <li><b>User support email</b> 選你的 Gmail。</li>
+        <li><b>App logo</b>、<b>App domain</b> 全部留空（不需要）。</li>
+        <li><b>Developer contact information</b> 填你的 Gmail。</li>
+        <li>按 <b>SAVE AND CONTINUE</b> 進下一頁 Scopes。</li>
+      </ol>
+      <span class="eyebrow" style="margin-top:14px;display:block;">操作步驟（Scopes）</span>
+      <ol>
+        <li>按 <b>ADD OR REMOVE SCOPES</b>。</li>
+        <li>跳出視窗，在搜尋列分別搜尋並勾選：</li>
+        <li style="list-style:none;padding-left:18px;">
+          <ul style="padding-left:18px;margin-top:4px;">
+            <li><code>https://www.googleapis.com/auth/drive</code>（Drive 全權）</li>
+            <li><code>https://www.googleapis.com/auth/gmail.modify</code>（Gmail 讀寫）</li>
+            <li><code>https://www.googleapis.com/auth/spreadsheets</code>（Sheets 全權）</li>
+          </ul>
+        </li>
+        <li>勾完按 <b>UPDATE</b>，回到 Scopes 頁面，按 <b>SAVE AND CONTINUE</b>。</li>
+      </ol>
+    </div>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span>Scopes 越寬，授權後能做的事越多，但風險也越高。<b>先用上面這三個全權 scopes 練習</b>。如果你只想讓 n8n 讀信不寫信，就改用 <code>gmail.readonly</code>，按需求調整。</span>
+    </div>
+  </div>
+
+  <div class="step" id="p2s3">
+    <div class="step-head">
+      <div class="num">三</div>
+      <h3>加 Test Users（不加會無法授權）</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>剛建的 App 預設是「測試模式」（Testing），<b>只有列在 Test users 清單裡的 Google 帳號才能授權</b>。其他人按授權會被 Google 擋下來說「這個 App 還沒通過審查」。</p>
+      <p>所以一定要把你自己的 Gmail 加進去，否則待會在 n8n 按授權會失敗。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>進到 Test users 頁面，按 <b>+ ADD USERS</b>。</li>
+        <li>輸入你自己的 Gmail（就是你要被 n8n 代理存取的那個帳號）。</li>
+        <li>按 <b>ADD</b>，再按 <b>SAVE AND CONTINUE</b>。</li>
+        <li>最後一頁 Summary 直接按 <b>BACK TO DASHBOARD</b>。同意畫面就設好了。</li>
+      </ol>
+    </div>
+
+    <div class="note ok">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <span>個人用根本不用「發布」這個 App，<b>永遠停在 Testing 狀態就好</b>。把要用的帳號全加進 Test users，授權都能跑。Google 那段「未驗證 App」警告畫面，按進階繼續就好。</span>
+    </div>
+  </div>
+
+  <!-- ============ PART 3 ============ -->
+  <div class="part-div">
+    <span class="line"></span><span class="tag">PART 3</span><span class="line"></span>
+  </div>
+  <div class="part-title">建立 OAuth 用戶端 ID</div>
+  <div class="part-sub">同意畫面設好了，現在才能建用戶端。注意：這段先建一半，Redirect URI 留空。Redirect URI 要從 n8n 那邊拿，第四段再回來補。</div>
+
+  <div class="step" id="p3s1">
+    <div class="step-head">
+      <div class="num">一</div>
+      <h3>進 Credentials 頁面</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>Credentials（憑證）是 GCP 管理所有用戶端跟 Key 的地方。所有授權相關的設定都在這裡建、這裡刪。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>Console 左上角選單，<b>APIs &amp; Services</b> → <b>Credentials</b>。</li>
+        <li>頁面預設是空的（沒有任何用戶端或 Key）。</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" id="p3s2">
+    <div class="step-head">
+      <div class="num">二</div>
+      <h3>按「Create Credentials」建立 OAuth 用戶端 ID</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>Credentials 頁面可以建好幾種憑證（API Key、OAuth 用戶端 ID、服務帳號）。我們要的是 <b>OAuth client ID</b>，因為要做的是「使用者授權」流程。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>頁面頂端按 <b>+ CREATE CREDENTIALS</b>。</li>
+        <li>下拉選單選 <b>OAuth client ID</b>。</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step" id="p3s3">
+    <div class="step-head">
+      <div class="num">三</div>
+      <h3>Application type 選「Web application」，命名為 n8n</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>Application type 有幾種選擇（Web、Desktop、Android、iOS、TV 等），<b>給 n8n 用一定要選 Web application（網頁應用程式）</b>。</p>
+      <p>為什麼？因為 n8n 是跑在瀏覽器裡的網頁應用。授權完成後，Google 要把你「導回」n8n 的網址，這個機制只有 Web application 才支援。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li><b>Application type</b> 選 <code>Web application</code>。</li>
+        <li><b>Name</b> 填 <code>n8n</code>。</li>
+        <li><b>Authorized JavaScript origins</b> 留空。</li>
+        <li><b>Authorized redirect URIs</b> <b>先留空</b>（這裡的內容要從 n8n 那邊拿，下一段教你拿）。</li>
+        <li>按 <b>CREATE</b>。</li>
+        <li>跳出視窗顯示 <b>Client ID</b> 跟 <b>Client secret</b>，<b>先別關</b>。下一段要用。</li>
+      </ol>
+    </div>
+
+    <div class="note bridge">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span><b>邏輯銜接：</b>現在你卡在「需要 Redirect URI 但還沒有」。這正常。Redirect URI 是 n8n 啟動時自動生成的網址，要去 n8n 那邊看才知道。接下來進 PART 4 去拿。</span>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-create-client.png" alt="建立 OAuth client ID 選 Web application 命名 n8n" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「建用戶端」截圖存成<br><code>google/images/step-create-client.png</code></div>
+      </div>
+      <figcaption>Application type 選 Web application，Name 填 n8n</figcaption>
+    </figure>
+  </div>
+
+  <!-- ============ PART 4 ============ -->
+  <div class="part-div">
+    <span class="line"></span><span class="tag bridge">▷ 接線 PART 4 ◁</span><span class="line"></span>
+  </div>
+  <div class="part-title" style="color:var(--n8n);">在 n8n 跟 GCP 之間來回接線</div>
+  <div class="part-sub">這段是最容易卡關的「邏輯交叉點」。簡單講：n8n 給 GCP 一個 URL（讓 Google 知道授權完要把人送回哪），GCP 給 n8n 兩串字（ID + Secret，讓 n8n 證明自己是合法的）。雙向都填完才會通。</div>
+
+  <div class="why-box bridge" style="margin-bottom:20px;">
+    <span class="eyebrow">為什麼要交叉做</span>
+    <p>OAuth 授權的核心是「雙方都要知道對方」。Google 要知道「授權完把使用者送回哪」（這就是 <b>Redirect URI</b>），n8n 要知道「我代表的是哪個 App」（這就是 <b>Client ID + Secret</b>）。</p>
+    <p>這兩串資訊一個在 n8n 手上、一個在 Google 手上，<b>所以必須在兩邊之間貼來貼去</b>。沒辦法只在一邊做完。</p>
+  </div>
+
+  <div class="step n8n-step" id="p4s1">
+    <div class="step-head">
+      <div class="num">一</div>
+      <h3>開 n8n，建一個 Google Drive OAuth2 憑證</h3>
+      <span class="scope-tag n8n">n8n</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>n8n 那邊需要為每種 Google 服務建一份「Credential（憑證）」。我們先建 Google Drive 的，<b>把 Redirect URL 拿出來</b>，回 GCP 補上。</p>
+      <p>Gmail 跟 Sheets 之後也要建各自的憑證，但流程一樣，<b>都會用到剛剛在 GCP 建的同一個 Client ID 跟 Secret</b>。一次設定，三個共用。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>打開 n8n（<a href="http://localhost:5678" target="_blank" style="color:var(--n8n);font-weight:500;">http://localhost:5678</a>）。</li>
+        <li>左側選單點 <b>Credentials</b>，再按 <b>+ Add Credential</b>。</li>
+        <li>搜尋 <b>Google Drive OAuth2 API</b>，點進去。</li>
+        <li>會看到一個欄位叫 <b>OAuth Redirect URL</b>，那是 n8n 自動產生的，<b>長得像</b> <code>http://localhost:5678/rest/oauth2-credential/callback</code>。</li>
+        <li><b>點右邊的複製按鈕</b>，把這個 URL 複製起來。</li>
+      </ol>
+    </div>
+
+    <div class="note bridge">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span><b>n8n 視窗先別關。</b>等一下還要回來貼 Client ID 跟 Secret。直接開新分頁去 GCP 補資料就好。</span>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-n8n-redirect-url.png" alt="n8n 的 Google Drive OAuth2 憑證頁面，顯示 OAuth Redirect URL" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「n8n 顯示 Redirect URL」截圖存成<br><code>google/images/step-n8n-redirect-url.png</code></div>
+      </div>
+      <figcaption>n8n 自動產生的 OAuth Redirect URL，複製它</figcaption>
+    </figure>
+  </div>
+
+  <div class="step" id="p4s2">
+    <div class="step-head">
+      <div class="num">二</div>
+      <h3>回 GCP，把 Redirect URL 貼到剛建的用戶端</h3>
+      <span class="scope-tag gcp">GCP</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>Google 收到 Redirect URL 之後，就知道「授權完成後要把使用者送回這個網址」。沒填這個，Google 會擋下授權說「Redirect URI mismatch」。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>切回 GCP Console 的 Credentials 頁面。</li>
+        <li>找到剛建的 <b>n8n</b> 用戶端（OAuth 2.0 Client IDs 區塊），<b>點進去</b>。</li>
+        <li>找到 <b>Authorized redirect URIs</b> 區塊，按 <b>+ ADD URI</b>。</li>
+        <li>把剛從 n8n 複製的 URL 貼上去（<code>http://localhost:5678/rest/oauth2-credential/callback</code>）。</li>
+        <li>按 <b>SAVE</b>。</li>
+        <li>回 Credentials 頁面，<b>再點 n8n 用戶端</b>，這次右上角會看到 <b>Client ID</b> 跟 <b>Client secret</b>，準備複製這兩串。</li>
+      </ol>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-gcp-redirect.png" alt="GCP 編輯用戶端，貼上 Redirect URL" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「GCP 貼 Redirect URL」截圖存成<br><code>google/images/step-gcp-redirect.png</code></div>
+      </div>
+      <figcaption>把 n8n 給的 URL 加進 Authorized redirect URIs</figcaption>
+    </figure>
+  </div>
+
+  <div class="step n8n-step" id="p4s3">
+    <div class="step-head">
+      <div class="num">三</div>
+      <h3>回 n8n，把 GCP 給的 Client ID + Secret 貼進去</h3>
+      <span class="scope-tag n8n">n8n</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>Client ID 是 n8n 的「身份證號碼」，Client Secret 是它的「密碼」。Google 認得這兩串，才會把授權當作合法。</p>
+      <p>沒填這兩串，n8n 按 Sign in with Google 會直接失敗。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>把 GCP 視窗的 <b>Client ID</b> 複製，貼到 n8n 那邊對應欄位。</li>
+        <li>同樣方式把 <b>Client secret</b> 複製、貼到 n8n。</li>
+        <li>n8n 那個憑證頁面就填齊了：Redirect URL（自動）、Client ID（你貼的）、Client Secret（你貼的）。</li>
+      </ol>
+    </div>
+
+    <div class="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+      <span>Client Secret 跟密碼一樣，<b>不要外流、不要 push 到 GitHub</b>。萬一外流就回 GCP 重新產生。詳細安全守則在頁面最下方。</span>
+    </div>
+  </div>
+
+  <div class="step n8n-step" id="p4s4">
+    <div class="step-head">
+      <div class="num">四</div>
+      <h3>按「Sign in with Google」授權，看到 Connected 就成功</h3>
+      <span class="scope-tag n8n">n8n</span>
+    </div>
+
+    <div class="why-box">
+      <span class="eyebrow">為什麼要做這件事</span>
+      <p>所有資料填好之後，按授權按鈕，n8n 會跳出 Google 的授權視窗（也就是 PART 2 設定的那個同意畫面）。在那個視窗按同意，n8n 才真正拿到「以你身份操作」的權限。</p>
+    </div>
+
+    <div class="howto-box">
+      <span class="eyebrow">操作步驟</span>
+      <ol>
+        <li>在 n8n 憑證頁面，按 <b>Sign in with Google</b> 按鈕。</li>
+        <li>會跳出新視窗讓你選 Google 帳號，<b>選你剛在 Test users 加的那個帳號</b>。</li>
+        <li>會看到一個警告「Google 尚未驗證此 App」，按 <b>進階</b> → <b>前往 n8n（不安全）</b>。這正常，因為這是你自己的 App，不會通過 Google 正式審查。</li>
+        <li>看到授權清單（要存取你的 Drive、Gmail、Sheets），按 <b>繼續</b> 或 <b>允許</b>。</li>
+        <li>視窗會自動關閉，回到 n8n。憑證頁面標題出現綠色 <b>Connected</b> 字樣，就成功了。</li>
+        <li>按 <b>Save</b> 把這個憑證存下來，給未來的 workflow 用。</li>
+      </ol>
+    </div>
+
+    <figure>
+      <img class="shot" src="images/step-n8n-connected.png" alt="n8n 顯示 Connected 成功狀態" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">截圖位置</div>
+        <div class="ph-s">把「n8n Connected 成功」截圖存成<br><code>google/images/step-n8n-connected.png</code></div>
+      </div>
+      <figcaption>看到 Connected 綠字代表 OAuth 串接成功</figcaption>
+    </figure>
+  </div>
+
+  <div class="done-card">
+    <h3>Drive 憑證搞定了</h3>
+    <p>Gmail 跟 Sheets 也要用？回 n8n Credentials 重複 PART 4 第一步，分別建 <b>Gmail OAuth2 API</b> 跟 <b>Google Sheets OAuth2 API</b> 憑證，<b>同樣用剛剛 GCP 那組 Client ID + Secret</b>。Redirect URL 都一樣，不用再回 GCP 改。</p>
+  </div>
+
+</section>
+
+<!-- 安全守則 -->
+<section class="wrap" id="security">
+  <div class="sec-card">
+    <h3>OAuth 用戶端安全守則</h3>
+    <ul>
+      <li><b>Client Secret 不要外流。</b>外流的話，別人可以冒充你的 App 騙別人授權。發現外流立刻去 GCP 把 Client 刪掉，重建一個。</li>
+      <li><b>不要 push 到 GitHub。</b>n8n 的 credentials 存在 <code>C:\n8n</code> 那個 volume 裡，如果你不小心把 <code>C:\n8n</code> 整個推上去就完了。把它加進 <code>.gitignore</code>。</li>
+      <li><b>App 保持 Testing 狀態。</b>個人用根本不需要發布，Testing 就能跑。發布反而會被 Google 抓去審查，要提交大量文件。</li>
+      <li><b>授權範圍越小越好。</b>如果你只是要讀 Gmail，scope 用 <code>gmail.readonly</code> 就好，不要選 <code>gmail.modify</code>。萬一外流災情會小很多。</li>
+      <li><b>定期回 Google 帳號檢查。</b>Google 帳號的「安全性」頁面有「具有帳戶存取權的第三方應用程式」，可以看哪些 App 還拿著你的授權。不用了的 App 撤銷授權。</li>
+    </ul>
+  </div>
+
+  <div class="note danger">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span>OAuth Client Secret 跟 API Key 不一樣，<b>外流的危害可能更大</b>。因為 OAuth Client 可以冒充你的身份去騙別人授權他們的帳號。一旦外流請立刻處理。</span>
+  </div>
+
+  <div class="done-card" style="margin-top:36px;background:var(--bg-paper-warm);">
+    <h3 style="color:var(--ink);">下一步：開始用 Drive / Gmail / Sheets 做自動化</h3>
+    <p>憑證有了之後，回 n8n 建 workflow 時拖一個 Google Drive / Gmail / Sheets 節點，在 Credential 欄選你剛建的這個憑證，就可以開始操作了。</p>
+    <a class="linkbtn" href="../" style="margin-top:18px;">
+      ◁ 回 n8n 地端部署主教學
+    </a>
+  </div>
+
+</section>
+
+<footer>
+  <div class="wrap">
+    <div style="font-size:12px;color:var(--accent);margin-bottom:18px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;">n8n 接 Google 服務 ※ OAuth 2.0 用戶端</div>
+    <div style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:8px;background:var(--card);border:1px solid var(--accent-mist);border-left:3px solid var(--accent-warm);box-shadow:var(--shadow);">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a0674b" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/>
+      </svg>
+      <span style="color:var(--ink);font-weight:600;font-size:14px;font-family:var(--font-serif);">閃電煎餃</span>
+      <span style="color:var(--ink-faint);font-size:13px;">出品</span>
+      <span style="color:var(--accent-light);">·</span>
+      <a href="https://gyozalab.com/" target="_blank" rel="noopener"
+         style="color:var(--accent-warm);text-decoration:none;font-size:13px;font-weight:500;">
+        gyozalab.com
+      </a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
