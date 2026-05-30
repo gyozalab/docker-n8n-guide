@@ -23,6 +23,37 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
+  .step,.daily-step{scroll-margin-top:20px}
+
+  /* ---- Table of Contents ---- */
+  .toc{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:24px 26px;margin-top:18px;
+  }
+  .toc h3{font-size:16px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .toc h3 svg{flex:0 0 auto}
+  .toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:580px){.toc-grid{grid-template-columns:1fr}}
+  .toc-col h4{
+    font-size:13px;color:var(--docker-blue);letter-spacing:1px;font-weight:700;
+    margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #DBEAFE;
+  }
+  .toc-col ol{list-style:none;padding:0;margin:0}
+  .toc-col li{margin-bottom:7px}
+  .toc-col a{
+    display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink-soft);
+    font-size:14px;padding:6px 8px;border-radius:6px;transition:all .15s;
+  }
+  .toc-col a:hover{background:#EFF6FF;color:var(--docker-blue)}
+  .toc-col a .tn{
+    flex:0 0 auto;width:22px;height:22px;border-radius:6px;background:#F1F5F9;color:var(--ink);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;
+  }
+  .toc-col a:hover .tn{background:var(--docker-blue);color:#fff}
+  .toc-col li.extra a{font-style:italic;color:#94A3B8;font-size:13.5px}
+
+  /* num badge supports CJK */
+  .num{font-size:17px}
   body{
     font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     color:var(--ink);
@@ -302,8 +333,44 @@
 <div class="wrap">
   <div class="board">
     <h2>整個流程長怎樣</h2>
-    <p>分兩段：<b>① 先把 Docker 裝好（步驟 1–5）</b>，這段會卡在 WSL 更新，照做就過；<b>② 用 Docker 跑 n8n（步驟 6–10）</b>，全程在 Docker 的圖形介面點一點就好，不用打指令。</p>
+    <p>分兩段：<b>① 先把 Docker 裝好（PART 1，五步）</b>，這段會卡在 WSL 更新，照做就過；<b>② 用 Docker 跑 n8n（PART 2，五步）</b>，全程在 Docker 的圖形介面點一點就好，不用打指令。</p>
   </div>
+
+  <nav class="toc">
+    <h3>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--docker-blue)" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      目錄 — 點任一步驟可直接跳轉
+    </h3>
+    <div class="toc-grid">
+      <div class="toc-col">
+        <h4>PART 1 · 安裝 Docker</h4>
+        <ol>
+          <li><a href="#p1s1"><span class="tn">一</span>下載 Docker Desktop</a></li>
+          <li><a href="#p1s2"><span class="tn">二</span>遇到 WSL needs updating</a></li>
+          <li><a href="#p1s3"><span class="tn">三</span>叫出執行視窗、輸入 cmd</a></li>
+          <li><a href="#p1s4"><span class="tn">四</span>跑 wsl --update 指令</a></li>
+          <li><a href="#p1s5"><span class="tn">五</span>等下載完成</a></li>
+          <li><a href="#p1done"><span class="tn">✓</span>回 Docker 按 Try Again</a></li>
+        </ol>
+      </div>
+      <div class="toc-col">
+        <h4>PART 2 · 跑起 n8n</h4>
+        <ol>
+          <li><a href="#p2s1"><span class="tn">一</span>進 Docker，點 Images</a></li>
+          <li><a href="#p2s2"><span class="tn">二</span>搜尋並 Pull n8n</a></li>
+          <li><a href="#p2s3"><span class="tn">三</span>按 Run 跑起來</a></li>
+          <li><a href="#p2s4"><span class="tn">四</span>展開 Optional settings</a></li>
+          <li><a href="#p2s5"><span class="tn">五</span>填好三項設定</a></li>
+          <li><a href="#p2done"><span class="tn">✓</span>進 n8n 設定帳號</a></li>
+        </ol>
+      </div>
+    </div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);display:flex;flex-wrap:wrap;gap:8px;">
+      <a href="#daily" style="text-decoration:none;background:#F0FDF4;color:#166534;font-size:13.5px;padding:7px 14px;border-radius:8px;border:1px solid #BBF7D0;font-weight:600;">⏯ 之後想再開 n8n？</a>
+      <a href="#trouble" style="text-decoration:none;background:#FEF2F2;color:#B91C1C;font-size:13.5px;padding:7px 14px;border-radius:8px;border:1px solid #FECACA;font-weight:600;">🚨 localhost 連不上？</a>
+      <a href="#faq" style="text-decoration:none;background:#F1F5F9;color:var(--ink);font-size:13.5px;padding:7px 14px;border-radius:8px;border:1px solid var(--line);font-weight:600;">❔ 常見問題</a>
+    </div>
+  </nav>
 </div>
 
 <section class="steps wrap">
@@ -317,9 +384,9 @@
   <div class="part-sub">從下載到第一次成功打開 Docker，途中會處理 WSL 更新提示。</div>
 
   <!-- STEP 1 -->
-  <div class="step">
+  <div class="step" id="p1s1">
     <div class="step-head">
-      <div class="num">1</div>
+      <div class="num">一</div>
       <h3>下載 Docker Desktop</h3>
     </div>
     <div class="body">
@@ -334,9 +401,9 @@
   </div>
 
   <!-- STEP 2 -->
-  <div class="step">
+  <div class="step" id="p1s2">
     <div class="step-head">
-      <div class="num">2</div>
+      <div class="num">二</div>
       <h3>安裝後開啟，會跳出「WSL needs updating」</h3>
     </div>
     <div class="body">
@@ -357,9 +424,9 @@
   </div>
 
   <!-- STEP 3 -->
-  <div class="step">
+  <div class="step" id="p1s3">
     <div class="step-head">
-      <div class="num">3</div>
+      <div class="num">三</div>
       <h3>叫出「執行」視窗，輸入 cmd</h3>
     </div>
     <div class="body">
@@ -382,9 +449,9 @@
   </div>
 
   <!-- STEP 4 -->
-  <div class="step">
+  <div class="step" id="p1s4">
     <div class="step-head">
-      <div class="num">4</div>
+      <div class="num">四</div>
       <h3>輸入更新指令，按 Enter</h3>
     </div>
     <div class="body">
@@ -407,9 +474,9 @@
   </div>
 
   <!-- STEP 5 -->
-  <div class="step">
+  <div class="step" id="p1s5">
     <div class="step-head">
-      <div class="num">5</div>
+      <div class="num">五</div>
       <h3>等 WSL 下載完成</h3>
     </div>
     <div class="body">
@@ -429,7 +496,7 @@
   </div>
 
   <!-- STEP 5.5 -->
-  <div class="step">
+  <div class="step" id="p1done">
     <div class="step-head">
       <div class="num">✓</div>
       <h3>回到 Docker，按藍色的「Try Again」</h3>
@@ -451,9 +518,9 @@
   <div class="part-sub">這段不用打指令，全程在 Docker 的圖形介面點一點就好。</div>
 
   <!-- STEP 6 -->
-  <div class="step">
+  <div class="step" id="p2s1">
     <div class="step-head">
-      <div class="num">6</div>
+      <div class="num">一</div>
       <h3>進到 Docker，點左邊「Images」</h3>
     </div>
     <div class="body">
@@ -472,9 +539,9 @@
   </div>
 
   <!-- STEP 7 -->
-  <div class="step">
+  <div class="step" id="p2s2">
     <div class="step-head">
-      <div class="num">7</div>
+      <div class="num">二</div>
       <h3>點「Search images to run」搜尋 n8n</h3>
     </div>
     <div class="body">
@@ -497,9 +564,9 @@
   </div>
 
   <!-- STEP 8 -->
-  <div class="step">
+  <div class="step" id="p2s3">
     <div class="step-head">
-      <div class="num">8</div>
+      <div class="num">三</div>
       <h3>抓下來後，按列表上的 Run 按鈕</h3>
     </div>
     <div class="body">
@@ -518,9 +585,9 @@
   </div>
 
   <!-- STEP 9 -->
-  <div class="step">
+  <div class="step" id="p2s4">
     <div class="step-head">
-      <div class="num">9</div>
+      <div class="num">四</div>
       <h3>展開「Optional settings」</h3>
     </div>
     <div class="body">
@@ -539,9 +606,9 @@
   </div>
 
   <!-- STEP 10 -->
-  <div class="step">
+  <div class="step" id="p2s5">
     <div class="step-head">
-      <div class="num">10</div>
+      <div class="num">五</div>
       <h3>照下面三項填好，按 Run</h3>
     </div>
     <div class="body">
@@ -583,7 +650,7 @@
   </div>
 
   <!-- STEP 11 / Result -->
-  <div class="step">
+  <div class="step" id="p2done">
     <div class="step-head">
       <div class="num">✓</div>
       <h3>跑起來後，點最後一行的網址進去</h3>
@@ -622,13 +689,79 @@
 
   <div class="done-card">
     <h3>🎉 全部完成！n8n 已經跑起來了</h3>
-    <p>之後想再次啟動，打開 Docker → Containers → 找到 n8n_d → 按 ▶ 即可，不用再重做這些步驟。</p>
+    <p>下面有「日後怎麼再開」的說明，務必看一下！</p>
   </div>
 
 </section>
 
+<!-- ============ 日常使用區塊 ============ -->
+<section class="wrap" id="daily" style="padding:24px 0 40px;">
+
+  <div style="background:linear-gradient(135deg,#065F46 0%,#10B981 100%);color:#fff;border-radius:var(--radius);padding:30px 28px;margin-bottom:22px;box-shadow:var(--shadow);">
+    <span style="display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:1px;margin-bottom:10px;">⏯ 日後使用</span>
+    <h2 style="font-size:22px;font-weight:800;margin-bottom:8px;">之後想再開 n8n？千萬別重做 PART 2！</h2>
+    <p style="color:#D1FAE5;font-size:15px;line-height:1.7;">
+      Image（安裝包）裝過一次就<b>不用再 Pull、不用再 Run a new container</b>。
+      之後打開 n8n 只要去 <b>Containers</b> 那邊點兩下就好——下面用一張圖告訴你怎麼點。
+    </p>
+  </div>
+
+  <div class="step daily-step">
+    <div class="step-head">
+      <div class="num">一</div>
+      <h3>打開 Docker Desktop，左邊點「Containers」</h3>
+    </div>
+    <div class="body">
+      <b>不要點 Images！</b> Images 是「安裝包」，已經有現成的容器了不用再裝一次。
+      點左邊選單第二個 <b>Containers</b>（立方體圖示），就會看到你之前建好的 <code>n8n_d</code>（或你自己取的名字）。
+    </div>
+  </div>
+
+  <div class="step daily-step">
+    <div class="step-head">
+      <div class="num">二</div>
+      <h3>沒在跑就按 ▶ 啟動，已經在跑就直接用</h3>
+    </div>
+    <div class="body">
+      看 Name 旁邊那顆小圓點：<b>🟢 綠色 = 正在跑</b>、<b>⚫ 灰色 = 停著</b>。
+      如果是灰色，按那行右邊 Actions 欄的 <b>▶ 三角形</b>啟動，等個 10–30 秒變綠就好。
+    </div>
+  </div>
+
+  <div class="step daily-step">
+    <div class="step-head">
+      <div class="num">三</div>
+      <h3>點 Port(s) 欄的「5678:5678」連結，直接開 n8n</h3>
+    </div>
+    <div class="body">
+      最方便的一招：那行的 <b>Port(s) 欄會顯示 5678:5678</b>（藍色字、有外連箭頭圖示），
+      <b>直接點下去就會在瀏覽器打開 n8n</b>，不用自己打網址。
+    </div>
+    <figure>
+      <img class="shot" src="images/step-daily-use.png" alt="Docker Desktop Containers 頁面，左邊紅圈標 Containers 選單，中間紅圈標 Port(s) 欄的 5678:5678 連結"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="ph" style="display:none">
+        <div class="ph-t">📸 截圖位置</div>
+        <div class="ph-s">把「Containers 頁面 port 連結」那張圖<br>存成 <code>images/step-daily-use.png</code></div>
+      </div>
+      <figcaption>① Containers 選單 ② 點 5678:5678 直接開 n8n</figcaption>
+    </figure>
+    <div class="note ok">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+      <span>用慣了之後可以把 <b>http://localhost:5678</b> 加入瀏覽器書籤，下次直接點書籤更快（前提是 Docker 跟容器有先啟動）。</span>
+    </div>
+  </div>
+
+  <div class="note" style="background:#FEF3C7;border-color:#FCD34D;color:#92400E;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg>
+    <span><b>⚠️ 千萬不要每次都重新 Pull / Run a new container！</b>那會建出第 2、第 3 個 n8n 容器，跟舊的搶 5678 port，馬上爆「address already in use」錯誤。<b>裝過一次就用 Containers 點開即可。</b></span>
+  </div>
+
+</section>
+<!-- ============ /日常使用區塊 ============ -->
+
 <!-- ============ 除錯區塊 ============ -->
-<section class="wrap" style="padding:8px 0 40px;">
+<section class="wrap" id="trouble" style="padding:8px 0 40px;">
 
   <div class="trouble-hero">
     <span class="badge">🚨 卡關自救</span>
@@ -765,7 +898,7 @@
 </section>
 <!-- ============ /除錯區塊 ============ -->
 
-<section class="faq wrap">
+<section class="faq wrap" id="faq">
   <h2>常見問題</h2>
 
   <details>
