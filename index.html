@@ -203,6 +203,76 @@
     .form-grid{grid-template-columns:1fr}
   }
 
+  /* ---- troubleshoot section ---- */
+  .trouble-hero{
+    background:linear-gradient(135deg,#7F1D1D 0%,#B91C1C 50%,#DC2626 100%);
+    color:#fff;border-radius:var(--radius);padding:30px 28px;margin:36px 0 22px;
+    box-shadow:var(--shadow);
+  }
+  .trouble-hero .badge{
+    display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);
+    padding:4px 12px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:1px;
+    margin-bottom:10px;
+  }
+  .trouble-hero h2{font-size:22px;font-weight:800;margin-bottom:8px}
+  .trouble-hero p{color:#FECACA;font-size:15px;line-height:1.7}
+
+  .check-row{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow);
+    display:flex;gap:16px;align-items:flex-start;
+  }
+  .check-row .ico{
+    flex:0 0 auto;width:36px;height:36px;border-radius:10px;background:#FEE2E2;color:#B91C1C;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;
+  }
+  .check-row .ico.ok{background:#DCFCE7;color:#166534}
+  .check-row h4{font-size:16px;margin-bottom:4px;font-weight:700}
+  .check-row .desc{color:var(--ink-soft);font-size:14.5px}
+  .check-row .fix{
+    margin-top:8px;padding:10px 12px;background:#F0FDF4;border-left:3px solid #16A34A;
+    border-radius:6px;font-size:14px;color:#166534;
+  }
+  .check-row .fix b{color:#0F5132}
+
+  /* error-card */
+  .err-card{
+    background:#1A1A2E;border:1px solid #3D2440;border-radius:12px;
+    padding:18px 20px;margin-bottom:14px;
+  }
+  .err-card .err-msg{
+    color:#FCA5A5;font-family:"SFMono-Regular",Consolas,monospace;font-size:13.5px;
+    background:#2A1620;padding:10px 12px;border-radius:6px;border:1px solid #4A1F2F;
+    line-height:1.6;word-break:break-word;
+  }
+  .err-card .err-mean{color:#CBD5E1;font-size:14px;margin-top:10px}
+  .err-card .err-mean b{color:#FBBF24}
+  .err-card .err-fix{color:#86EFAC;font-size:14px;margin-top:6px}
+  .err-card .err-fix b{color:#22D3EE}
+
+  /* flow check */
+  .flow-step{
+    background:#fff;border:2px solid var(--docker-blue);border-radius:12px;
+    padding:18px 20px;margin-bottom:14px;position:relative;
+  }
+  .flow-step h4{font-size:16px;font-weight:700;color:var(--docker-blue);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .flow-step h4 .step-no{
+    background:var(--docker-blue);color:#fff;width:26px;height:26px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:13px;
+  }
+  .flow-step p{color:var(--ink-soft);font-size:14.5px;line-height:1.7}
+  .flow-step .check-q{
+    margin-top:10px;padding:10px 14px;background:#EFF6FF;border-radius:8px;
+    color:var(--ink);font-size:14px;font-weight:600;
+  }
+  .flow-step .yes-no{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .flow-step .pill-yn{
+    font-size:13px;padding:6px 12px;border-radius:8px;flex:1;text-align:center;
+    min-width:120px;
+  }
+  .flow-step .pill-yn.no{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA}
+  .flow-step .pill-yn.yes{background:#F0FDF4;color:#166534;border:1px solid #BBF7D0}
+
   @media (max-width:520px){
     .term-body{flex-direction:column;align-items:stretch}
     .copy-btn{justify-content:center}
@@ -556,6 +626,144 @@
   </div>
 
 </section>
+
+<!-- ============ 除錯區塊 ============ -->
+<section class="wrap" style="padding:8px 0 40px;">
+
+  <div class="trouble-hero">
+    <span class="badge">🚨 卡關自救</span>
+    <h2>打開 localhost:5678 連不上？</h2>
+    <p>別慌，95% 都是這幾種小問題。下面用「三步自我診斷」幫你抓出來，搞不懂英文錯誤訊息也沒關係，下面有翻譯。</p>
+  </div>
+
+  <h3 style="font-size:18px;margin:24px 0 12px;font-weight:700;">📍 先理解：localhost:5678 在講什麼？</h3>
+  <div class="step" style="padding:20px 22px;">
+    <p style="color:var(--ink-soft);font-size:15px;line-height:1.8;">
+      想像 Docker 容器是<b>一棟蓋在你電腦裡的小房子</b>，<code>localhost</code> 就是「你自己這台電腦」的地址，
+      <code>:5678</code> 是房子的<b>門牌號碼</b>。<br>
+      所以 <code>http://localhost:5678</code> = 「請打開我電腦裡 5678 號那間房子的大門」。<br>
+      <b>連不上 = 那個門牌號碼的房子根本沒蓋好、沒開門，或者被路障擋住了。</b>
+    </p>
+  </div>
+
+  <h3 style="font-size:18px;margin:30px 0 12px;font-weight:700;">🔍 三步自我診斷</h3>
+
+  <div class="flow-step">
+    <h4><span class="step-no">1</span>容器到底有沒有在跑？</h4>
+    <p>打開 Docker Desktop → 左邊點 <b>Containers</b>，找到 <code>n8n_d</code> 那一行，看狀態欄。</p>
+    <div class="check-q">❓ 狀態是「<b>Running</b>」綠燈嗎？</div>
+    <div class="yes-no">
+      <div class="pill-yn yes">✅ 是 → 繼續第 2 步</div>
+      <div class="pill-yn no">❌ 不是 → 按那行右邊的 ▶ 啟動</div>
+    </div>
+    <div class="fix">
+      <b>💡 容器灰色 / Exited 是什麼意思？</b>就是房子蓋好了但沒開門。按 ▶ 啟動它就好；如果一啟動又立刻變灰，往下看第 2 步。
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <h4><span class="step-no">2</span>有沒有別的東西也在搶 5678？</h4>
+    <p>最常見的狀況：你以為第一次安裝失敗，又重做了一遍，<b>結果不知不覺開了兩個 n8n</b>，兩個都想用 5678，互相打架。</p>
+    <div class="check-q">❓ 在 Containers 頁面，有沒有看到「兩個」n8n 容器？</div>
+    <div class="yes-no">
+      <div class="pill-yn no">❌ 有兩個 → 把舊的那個刪掉（垃圾桶圖示）</div>
+      <div class="pill-yn yes">✅ 只有一個 → 繼續第 3 步</div>
+    </div>
+    <div class="fix">
+      <b>💡 怎麼判斷哪個要刪？</b>看建立時間，留比較新的那個。或兩個都刪掉，從 Images 重新 Run 一次。
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <h4><span class="step-no">3</span>瀏覽器網址有沒有打對？</h4>
+    <p>有時候只是手快打錯字。確認瀏覽器網址列是<b>完全長這樣</b>：</p>
+    <div class="term" style="margin-top:10px;">
+      <div class="term-body" style="padding:14px 18px;">
+        <code><span class="prompt">http://</span>localhost:5678</code>
+      </div>
+    </div>
+    <div class="fix">
+      <b>常見打錯：</b><br>
+      ❌ <code>https://</code>（多了 s，n8n 本機跑沒有加密憑證）<br>
+      ❌ <code>localhost:5679</code>（port 打錯，你設定填的是 5678 就一定是 5678）<br>
+      ❌ <code>localhost/5678</code>（用斜線不是冒號）
+    </div>
+  </div>
+
+  <h3 style="font-size:18px;margin:36px 0 12px;font-weight:700;">📖 常見錯誤訊息中文翻譯</h3>
+  <p style="color:var(--ink-soft);font-size:14.5px;margin-bottom:14px;">
+    Docker 跳出紅色錯誤訊息看不懂？對照下面這張卡找你看到的關鍵字。
+  </p>
+
+  <div class="err-card">
+    <div class="err-msg">listen tcp4 0.0.0.0:5678: bind: address already in use</div>
+    <div class="err-mean"><b>🔍 意思：</b>5678 這個 port 已經被佔走了——通常是你開了第二個 n8n，跟第一個搶。</div>
+    <div class="err-fix"><b>✅ 解法：</b>去 Containers 找出兩個 n8n，刪掉其中一個。或新容器的 Host port 改成 5679。</div>
+  </div>
+
+  <div class="err-card">
+    <div class="err-msg">Error response from daemon: Conflict. The container name "/n8n_d" is already in use</div>
+    <div class="err-mean"><b>🔍 意思：</b>已經有一個叫「n8n_d」的容器了，名字不能重複。</div>
+    <div class="err-fix"><b>✅ 解法：</b>容器名字改一個（例如 n8n_d2），或先去 Containers 把舊的 n8n_d 刪掉。</div>
+  </div>
+
+  <div class="err-card">
+    <div class="err-msg">driver failed programming external connectivity</div>
+    <div class="err-mean"><b>🔍 意思：</b>Docker 想把容器接到你電腦的網路，但接不上去。<b>九成是 port 衝突</b>，少數是 Docker 內部網路壞掉。</div>
+    <div class="err-fix"><b>✅ 解法：</b>先檢查有沒有兩個容器搶同一 port；如果沒有，重啟 Docker Desktop（右下角小鯨魚右鍵 → Restart）。</div>
+  </div>
+
+  <div class="err-card">
+    <div class="err-msg">無法連上這個網站 / This site can't be reached / ERR_CONNECTION_REFUSED</div>
+    <div class="err-mean"><b>🔍 意思：</b>瀏覽器在 5678 找不到任何東西回應它——容器沒在跑，或還在啟動中。</div>
+    <div class="err-fix"><b>✅ 解法：</b>(1) 回去 Docker 確認容器是綠燈 Running；(2) 如果剛按啟動，等 30 秒再開——n8n 首次啟動要建資料庫。</div>
+  </div>
+
+  <h3 style="font-size:18px;margin:36px 0 12px;font-weight:700;">🏢 用公司電腦特別會卡的事</h3>
+
+  <div class="check-row">
+    <div class="ico">①</div>
+    <div>
+      <h4>沒有 admin 權限裝 Docker</h4>
+      <div class="desc">安裝時跳出 UAC 視窗要密碼，但你沒有公司電腦的管理員密碼。</div>
+      <div class="fix"><b>找 IT：</b>請 IT 幫你裝，或請他們把你的帳號加進「Hyper-V Administrators」群組。</div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="ico">②</div>
+    <div>
+      <h4>公司禁用 WSL / Hyper-V</h4>
+      <div class="desc">跑 <code>wsl --update</code> 被拒絕，或 Docker 一直啟動失敗說「Hyper-V 未啟用」。</div>
+      <div class="fix"><b>找 IT：</b>有些公司資安政策會關掉這些功能，要請 IT 開白名單。</div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="ico">③</div>
+    <div>
+      <h4>公司 Proxy 擋掉 Docker Hub</h4>
+      <div class="desc">Pull n8n image 時卡住或 timeout，下載完全沒進度。</div>
+      <div class="fix"><b>解法：</b>在 Docker Desktop → Settings → Resources → Proxies 填公司 Proxy 設定（問 IT 拿 proxy 網址）。或換到家裡網路試。</div>
+    </div>
+  </div>
+
+  <div class="check-row">
+    <div class="ico ok">④</div>
+    <div>
+      <h4>防火牆擋 localhost？</h4>
+      <div class="desc">這個<b>幾乎不會發生</b>。localhost 是你電腦跟自己講話，Windows 防火牆預設不會擋。</div>
+      <div class="fix"><b>不用煩惱這個。</b>如果真的懷疑，暫時關掉 Windows Defender 防火牆測一下——但通常問題不在這。</div>
+    </div>
+  </div>
+
+  <div class="note ok" style="margin-top:18px;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+    <span><b>還是搞不定？</b>把錯誤訊息整段截圖（紅色那段英文很重要！），加上 Docker 的 Containers 頁面截圖，問問身邊懂的人——這兩張圖通常就足夠診斷 9 成問題。</span>
+  </div>
+
+</section>
+<!-- ============ /除錯區塊 ============ -->
 
 <section class="faq wrap">
   <h2>常見問題</h2>
